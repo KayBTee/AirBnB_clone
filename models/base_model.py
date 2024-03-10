@@ -1,6 +1,9 @@
+#!/usr/bin/python3
+
 from uuid import uuid4
 from datetime import datetime
 from models import storage
+
 
 class BaseModel:
     """
@@ -25,7 +28,6 @@ class BaseModel:
                     setattr(self, key, datetime.fromisoformat(value))
                 elif key != '__class__':
                     setattr(self, key, value)
-
 
         else:
             self.id = str(uuid4())
@@ -61,4 +63,4 @@ class BaseModel:
         dict_obj['created_at'] = self.created_at.isoformat()
         dict_obj['updated_at'] = self.updated_at.isoformat()
         return dict_obj
-    
+
