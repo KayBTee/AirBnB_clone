@@ -12,13 +12,22 @@ class FileStorage:
         return self.__objects
 
     def new(self, obj):
-        obj_name = f"{obj.__class__.name}.{obj.id}"
-        setattr(self.__objects, obj_name, obj)
+        obj_name = f"{obj.__class__.__name__}.{obj.id}"
+        self.__objects[obj_name] = obj
 
     def save(self):
-        with open(self.__file_path, 'w') as f:
-            json.dump(self.__objects, f)
+        try:
+            ser_objs = {}
+            for key, value in self.__objects.items():
+                ser_objs[key] = value.to_dict()
+            with open(self.__file_path, 'w') as f:
+                json.dump(ser_objs, f, default=str)
+        except Exception as e:
+            print(e)
 
     def reload(self):
-        with open(self.__file_path, 'r') as f:
-            self.__objects = json.load(f)
+        try:
+            with open(self.__file_path, 'r') as f:
+                self.__objects = json.load(f)
+        except Exception as e:
+            self.__objects = {}
