@@ -40,7 +40,8 @@ class BaseModel:
         Returns a string representation of the model
 
         Return:
-            A string representation containing the class name, it's id, and attributes dictionary.
+            A string representation containing the class name,
+            it's id, and attributes dictionary.
         """
         return f"[{self.__class__.__name__}] ({self.id}) {self.__dict__}"
 
@@ -56,11 +57,11 @@ class BaseModel:
         Converts the BaseModel object into dictionary representation
 
         Returns:
-            dict: A dictionary containing the class name, id, created_at, and updated_at attributes.
+            dict: A dictionary containing the class name, id, created_at,
+            and updated_at attributes.
         """
         dict_obj = self.__dict__.copy()
         dict_obj['__class__'] = self.__class__.__name__
         dict_obj['created_at'] = self.created_at.isoformat()
         dict_obj['updated_at'] = self.updated_at.isoformat()
         return dict_obj
-
