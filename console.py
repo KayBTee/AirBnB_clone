@@ -25,55 +25,24 @@ class HBNBCommand(cmd.Cmd):
     """
     prompt = "(hbnb) "
 
-    vlid_classes = ["BaseModel", "User", "State", "City",
+    valid_classes = ["BaseModel", "User", "State", "City",
                      "Amenity", "Place", "Review"]
 
-    vlid_int_attributes = ["number_rooms", "number_bathrooms",
+    valid_int_attributes = ["number_rooms", "number_bathrooms",
                             "max_guest", "last_name"]
 
-    vlid_float_attributes = ["latitude", "longitude"]
+    valid_float_attributes = ["latitude", "longitude"]
 
-    vlid_str_attributes = ["name", "amenity_id", "place_id",
+    valid_string_attributes = ["name", "amenity_id", "place_id",
                                "state_id", "user_id", "city_id",
                                "description", "text", "email",
                                "password", "first_name", "last_name"]
-
-    def do_quit(self, arg):
-        """
-        Quit command to exit the program
-        """
-        return (True)
-
-    def do_destroy(self, arg):
-        """
-        Deletes any instance
-        """
-        if self.vlid_arg(arg, True):
-            my_args = arg.split()
-            my_key = my_args[0]+"."+my_args[1]
-            del storage.all()[my_key]
-            storage.save()
-
-    def emptyline(self):
-        """
-        Does nothing
-        when empty line
-        recieved
-        """
-        pass
-
-    def do_EOF(self, arg):
-        """
-        Ctrl-D to exit the program
-        """
-        return (True)
-
 
     def do_create(self, arg):
         """
         Creates a new instance
         """
-        v_classes = {
+        av_classes = {
             "BaseModel": BaseModel,
             "User": User,
             "Place": Place,
@@ -82,14 +51,14 @@ class HBNBCommand(cmd.Cmd):
             "Amenity": Amenity,
             "Review": Review
         }
-        if self.vlid_arg(arg):
+        if self.valid_arg(arg):
             my_args = arg.split()
-            if my_args[0] in v_classes:
-                instance = v_classes[my_args[0]]()
+            if my_args[0] in av_classes:
+                instance = av_classes[my_args[0]]()
                 storage.save()
                 print(instance.id)
 
-    def vlid_arg(self, arg, my_id=False, my_attr=False):
+    def valid_arg(self, arg, my_id=False, my_attr=False):
         """
         Validates arguments passed
         """
@@ -98,7 +67,7 @@ class HBNBCommand(cmd.Cmd):
         if args_len == 0:
             print("** class name missing **")
             return (False)
-        elif my_args[0] not in HBNBCommand.vlid_classes:
+        elif my_args[0] not in HBNBCommand.valid_classes:
             print("** class doesn't exist **")
             return (False)
         elif args_len < 2 and my_id:
@@ -115,28 +84,34 @@ class HBNBCommand(cmd.Cmd):
             return (False)
         return (True)
 
-    def do_update(self, arg):
+    def emptyline(self):
         """
-        Updates an instance by adding or updating attribute
+        Does nothing
+        when empty line
+        recieved
         """
-        if self.vlid_arg(arg, True, True):
+        pass
+
+    def do_EOF(self, arg):
+        """
+        Ctrl-D to exit the program
+        """
+        return (True)
+
+    def do_quit(self, arg):
+        """
+        Quit command to exit the program
+        """
+        return (True)
+
+    def do_destroy(self, arg):
+        """
+        Deletes any instance
+        """
+        if self.valid_arg(arg, True):
             my_args = arg.split()
             my_key = my_args[0]+"."+my_args[1]
-            if my_args[3].startswith('"'):
-                match = re.search(r'"([^"]+)"', arg).group(1)
-            elif my_args[3].stratswith("'"):
-                match = re.search(r'\'([^\']+)\'', arg).group(1)
-            else:
-                match = my_args[3]
-            if my_args[2] in HBNBCommand.vlid_str_attributes:
-                setattr(storage.all()[my_key], my_args[2], str(match))
-            elif my_args[2] in HBNBCommand.vlid_int_attributes:
-                setattr(storage.all()[my_key], my_args[2], int(match))
-            elif my_args[2] in HBNBCommand.vlid_float_attributes:
-                setattr(storage.all()[my_key], my_args[2], float(match))
-            else:
-                setattr(storage.all()[my_key], my_args[2],
-                        self.casting(match))
+            del storage.all()[my_key]
             storage.save()
 
     def do_clear(self, arg):
@@ -152,10 +127,64 @@ class HBNBCommand(cmd.Cmd):
         """
         Prints the string representation of an instance
         """
-        if self.vlid_arg(arg, True):
+        if self.valid_arg(arg, True):
             my_args = arg.split()
             my_key = my_args[0]+"."+my_args[1]
             print(storage.all()[my_key])
+
+    def do_update(self, arg):
+        """
+        Updates an instance by adding or updating attribute
+        """
+        if self.valid_arg(arg, True, True):
+            my_args = arg.split()
+            my_key = my_args[0]+"."+my_args[1]
+            if my_args[3].startswith('"'):
+                match = re.search(r'"([^"]+)"', arg).group(1)
+            elif my_args[3].stratswith("'"):
+                match = re.search(r'\'([^\']+)\'', arg).group(1)
+            else:
+                match = my_args[3]
+            if my_args[2] in HBNBCommand.valid_string_attributes:
+                setattr(storage.all()[my_key], my_args[2], str(match))
+            elif my_args[2] in HBNBCommand.valid_int_attributes:
+                setattr(storage.all()[my_key], my_args[2], int(match))
+            elif my_args[2] in HBNBCommand.valid_float_attributes:
+                setattr(storage.all()[my_key], my_args[2], float(match))
+            else:
+                setattr(storage.all()[my_key], my_args[2],
+                        self.casting(match))
+            storage.save()
+
+    def do_all(self, arg):
+        """
+        Prints all string representation of all
+        """
+        my_args = arg.split()
+        _len = len(my_args)
+        my_list = []
+        if _len >= 1:
+            if my_args[0] not in HBNBCommand.valid_classes:
+                print("** class doesn't exist **")
+                return
+            for key, value in storage.all().items():
+                if my_args[0] in key:
+                    my_list.append(str(value))
+        else:
+            for key, value in storage.all().items():
+                my_list.append(str(value))
+            print(my_list)
+
+    def casting(self, arg):
+        """ cast string to float or int if possible"""
+        try:
+            if "." in arg:
+                arg = float(arg)
+            else:
+                arg = int(arg)
+        except ValueError:
+            pass
+        return arg
 
     def _exec(self, arg):
         """Helper function parsing filtering replacing"""
@@ -185,37 +214,6 @@ class HBNBCommand(cmd.Cmd):
             if arg[:-1] in key:
                 count += 1
                 print(count)
-
-    def do_all(self, arg):
-        """
-        Prints all string representation of all
-        """
-        my_args = arg.split()
-        _len = len(my_args)
-        my_list = []
-        if _len >= 1:
-            if my_args[0] not in HBNBCommand.vlid_classes:
-                print("** class doesn't exist **")
-                return
-            for key, value in storage.all().items():
-                if my_args[0] in key:
-                    my_list.append(str(value))
-        else:
-            for key, value in storage.all().items():
-                my_list.append(str(value))
-            print(my_list)
-
-    def casting(self, arg):
-        """ cast string to float or int if possible"""
-        try:
-            if "." in arg:
-                arg = float(arg)
-            else:
-                arg = int(arg)
-        except ValueError:
-            pass
-        return arg
-
 
     def default(self, arg):
         """Default if there no command found"""
