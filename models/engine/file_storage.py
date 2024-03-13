@@ -1,7 +1,14 @@
 #!/usr/bin/python3
 
-
+""" Defines FileSotrage """
 import json
+from models.base_model import BaseModel
+from models.user import User
+from models.state import State
+from models.city import City
+from models.place import Place
+from models.amenity import Amenity
+from models.review import Review
 
 
 class FileStorage:
@@ -9,25 +16,26 @@ class FileStorage:
     __objects = {}
 
     def all(self):
-        return self.__objects
+        return FileStorage.__objects
 
     def new(self, obj):
-        obj_name = "{}.{}".format(obj.__class__.__name__, obj.id)
-        self.__objects[obj_name] = obj
+        obj_name = obj.__class__.__name__
+        FileStorage.__objects["{}.{}".format(obj_name, obj.id)] = obj
 
     def save(self):
-        try:
-            ser_objs = {}
-            for key, value in self.__objects.items():
-                ser_objs[key] = value.to_dict()
-            with open(self.__file_path, 'w') as f:
-                json.dump(ser_objs, f, default=str)
-        except Exception as e:
-            print(e)
+        """ Serialize objects to JSON file path """
+        odict = FileStorage.__objects
+        objdict = {obj: odict[obj].to_dict() for obj in odict.keys()}
+        with open(FileStorage.__file_path, "w") as f:
+            json.dump(objdict, f)
 
     def reload(self):
         try:
-            with open(self.__file_path, 'r') as f:
-                self.__objects = json.load(f)
-        except Exception as e:
-            self.__objects = {}
+            with open(FileStorage.__file_path) as f:
+                objdict = json.load(f)
+                for o in objdict.values():
+                    cls_name = o["__class__"]
+                    del o["__class__"]
+                    self.new(eval(cls_name)(**o))
+        except FileNotFoundError:
+            return
